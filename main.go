@@ -12,6 +12,3 @@ func main() {
 
 	fmt.Println(name, age)
 }
-
-// test githubu
-// jedu bomby
