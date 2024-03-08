@@ -85,12 +85,35 @@ func bookByTitle(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, book)
 }
 
+func checkoutBook(c *gin.Context) {
+	id, ok := c.GetQuery("id")
+	if !ok {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "missing id query parameter"})
+		return
+	}
+
+	book, err := getBookById(id)
+	if err != nil {
+		errorMessage := fmt.Sprintf("book with id %v does not exist", id)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": errorMessage})
+		return
+	}
+	if book.Quantity <= 0 {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "book not available"})
+		return
+	}
+	book.Quantity -= 1
+	c.IndentedJSON(http.StatusOK, book)
+
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/books", getBooks)
 	router.POST("/books", createBook)
 	router.GET("/books/id/:id", bookById)
 	router.GET("/books/title/:title", bookByTitle)
+	router.PATCH("/checkout", checkoutBook)
 	router.Run("localhost:8080")
 
 }
